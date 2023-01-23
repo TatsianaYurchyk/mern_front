@@ -2,6 +2,9 @@ import { ConflictError, UnauthorizedError } from "../errors/http_errors";
 import { UserNote } from "../models/userNote";
 import { User } from "../models/user";
 
+const USER_API_URL = "http://mern-register.onrender.com";
+// const USER_API_URL = "http://localhost:3000";
+
 async function fetchData(input: RequestInfo, init?: RequestInit) {
     const response = await fetch(input, init);
     if (response.ok) {
@@ -20,7 +23,8 @@ async function fetchData(input: RequestInfo, init?: RequestInit) {
 }
 
 export async function getLoggedInUser(): Promise<User> {
-    const response = await fetchData("/api/users", { method: "GET" });
+    // const response = await fetchData("/api/users", { method: "GET" });
+    const response = await fetchData(`${USER_API_URL}/api/users`, { method: "GET" });
     return response.json();
 }
 
@@ -31,7 +35,7 @@ export interface SignUpCredentials {
 }
 
 export async function signUp(credentials: SignUpCredentials): Promise<User> {
-    const response = await fetchData("/api/users/signup",
+    const response = await fetchData(`${USER_API_URL}/api/users/signup`,
         {
             method: "POST",
             headers: {
@@ -48,7 +52,7 @@ export interface LoginCredentials {
 }
 
 export async function login(credentials: LoginCredentials): Promise<User> {
-    const response = await fetchData("/api/users/login",
+    const response = await fetchData(`${USER_API_URL}/api/users/login`,
         {
             method: "POST",
             headers: {
@@ -64,16 +68,16 @@ export async function logout() {
 }
 
 export async function fetchUsers(): Promise<UserNote[]> {
-    const response = await fetchData("/api/users/get", { method: "GET" });
+    const response = await fetchData(`${USER_API_URL}/api/users/get`, { method: "GET" });
     return response.json();
 }
 
 export async function deleteUser(userId: string) {
-    await fetchData("/api/users/" + userId, { method: "DELETE" });
+    await fetchData(`${USER_API_URL}/api/users/` + userId, { method: "DELETE" });
 }
 
 export async function blockStatus(userId: string): Promise<User> {
-    const response = await fetchData("/api/users/" + userId,
+    const response = await fetchData(`${USER_API_URL}/api/users/` + userId,
         {
             method: "PATCH",
             headers: {
@@ -85,7 +89,7 @@ export async function blockStatus(userId: string): Promise<User> {
 }
 
 export async function activateStatus(userId: string): Promise<User> {
-    const response = await fetchData("/api/users/" + userId,
+    const response = await fetchData(`${USER_API_URL}/api/users/` + userId,
         {
             method: "PATCH",
             headers: {
