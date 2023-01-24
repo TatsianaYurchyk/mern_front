@@ -16,7 +16,7 @@ interface UsersPageProps {
 const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 	const [users, setUsers] = useState<UserNote[]>([]);
 	const [isCheck, setIsCheck] = useState<UserNote[]>([]);
-	const [isCheckAll, setIsCheckAll] = useState(false);
+	// const [isCheckAll, setIsCheckAll] = useState(false);
 	const [isClick, setIsClick] = useState(false);
 
 	useEffect(() => {
@@ -34,12 +34,22 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 
 	// Checkbox handle start
 
-	const toggleCheckbox = (
-		e: React.ChangeEvent<HTMLInputElement>,
-		item: any
-	) => {
-		const {name} = e.target;
-		let tempUser = isCheck.find((user) => user.username === name);
+	const handleAllChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const newUsers = users;
+		newUsers.forEach(user => (user.isChecked = e.target.checked));
+		setUsers(newUsers);
+		e.target.checked? setIsCheck(users):setIsCheck([])
+		console.log(isCheck);
+	  };
+	
+	const toggleCheckbox = (e: React.ChangeEvent<HTMLInputElement>,item: any) => {
+		// const newUsers = users;
+		// newUsers.forEach(user => {
+		//   if (user.username === e.target.name){user.isChecked = e.target.checked}
+			
+		// });
+		// setUsers(newUsers)
+		let tempUser = isCheck.find((user) => user.username === e.target.name);
 		if (tempUser) {
 			isCheck.splice(isCheck.indexOf(item), 1);
 		} else {
@@ -48,25 +58,28 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 			setIsCheck(newCheckedUsers);
 		}
 		console.log(isCheck);
-	};
 
-	const handleAllChecked = () => {
-		setIsCheckAll((prev) => !prev);
-	};
-	const handleAllCheckedFull = () => {
-		if (isCheckAll) {
-			users.forEach((user) => (user.isChecked = true));
-			setIsCheck(users);
+	  };
 
-		} else {
-			setIsCheck([]);
-			users.forEach((user) => (user.isChecked = false));
-		}
-	};
+	// const handleAllChecked = () => {
+	// 	setIsCheckAll((prev) => !prev);
+	// };
+	// const handleAllCheckedFull = () => {
+	// 	if (isCheckAll) {
+	// 		users.forEach((user) => (user.isChecked = true));
+	// 		setIsCheck(users);
 
-	useEffect(() => {
-		handleAllCheckedFull();
-	}, 	[isCheckAll]);
+	// 	} else {
+	// 		setIsCheck([]);
+	// 		users.forEach((user) => (user.isChecked = false));
+	// 	}
+	// 	console.log(isCheckAll)
+	// 	console.log(isCheck)
+	// };
+
+	// useEffect(() => {
+	// 	handleAllCheckedFull();
+	// }, 	[isCheckAll]);
 
 	// Checkbox handle end
 
@@ -81,18 +94,11 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 			alert(error);
 		}
 	}
-
-	const deleteAll = () => {
-		isCheck.map((item) => deleteUser(item));
-		setIsClick((prev) => !prev);
-        loadUsers()
-		setIsCheck([])
-	};
-
 	async function loadUsers() {
 		try {
 			const users = await UsersApi.fetchUsers();
 			setUsers(users);
+			console.log("loadnotes");
 		} catch (error) {
 			console.error(error);
 		}
@@ -107,6 +113,15 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 		}
 	}
 
+	const deleteAll = () => {
+		isCheck.map((item) => deleteUser(item));
+		isCheck.find((item) =>
+			item.username === loggedInUser.username
+				? logout()
+				: setIsCheck([]))
+        loadUsers()
+	};
+
 	async function blockStatus(user: UserNote) {
 		try {
 			await UsersApi.blockStatus(user._id);
@@ -119,7 +134,7 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 		isCheck.map((item) => blockStatus(item));
 		setIsClick((prev) => !prev);
 		loadUsers();
-		setIsCheck([])
+		console.log(isCheck);
 	};
 
 	const dropUser =()=>{
@@ -145,10 +160,9 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 	const activateStatusAll = () => {
 		isCheck.map((item) => activateStatus(item));
 		loadUsers()
-		setIsCheck([])
+		// setIsCheck([])
 	};
 
-	
     const usersGrid = (
 		<>
 			{users.map((user) => (
@@ -171,7 +185,6 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 			))}
 		</>
 	);
-
 
 	return (
 		<>
