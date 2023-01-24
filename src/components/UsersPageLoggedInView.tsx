@@ -29,7 +29,7 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 			}
 		}
 		loadUsers();
-	}, []);
+	}, [isCheck]);
 
 
 	// Checkbox handle start
@@ -38,8 +38,7 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 		const newUsers = users;
 		newUsers.forEach(user => (user.isChecked = e.target.checked));
 		setUsers(newUsers);
-		e.target.checked? setIsCheck(users):setIsCheck([])
-		console.log(isCheck);
+		e.target.checked? setIsCheck(newUsers):setIsCheck([])
 	  };
 	
 	const toggleCheckbox = (e: React.ChangeEvent<HTMLInputElement>,item: any) => {
@@ -98,7 +97,7 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 		try {
 			const users = await UsersApi.fetchUsers();
 			setUsers(users);
-			console.log("loadnotes");
+			console.log("loadusers");
 		} catch (error) {
 			console.error(error);
 		}
