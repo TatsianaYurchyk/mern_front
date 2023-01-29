@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button} from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import { FaTrashAlt } from "react-icons/fa";
 import { UserNote } from "../models/userNote";
 import * as UsersApi from "../network/users_api";
@@ -11,9 +11,10 @@ import { User } from "../models/user";
 
 interface UsersPageProps {
 	loggedInUser: User;
+	onLogoutSuccessful: () => void,
 }
 
-const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
+const UsersPageLoggedInView = ({ loggedInUser,onLogoutSuccessful }: UsersPageProps) => {
 	const [users, setUsers] = useState<UserNote[]>([]);
 	const [isCheck, setIsCheck] = useState<UserNote[]>([]);
 	// const [isCheckAll, setIsCheckAll] = useState(false);
@@ -31,21 +32,23 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 		loadUsers();
 	}, [isCheck]);
 
-
 	// Checkbox handle start
 
 	const handleAllChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newUsers = users;
-		newUsers.forEach(user => (user.isChecked = e.target.checked));
+		newUsers.forEach((user) => (user.isChecked = e.target.checked));
 		setUsers(newUsers);
-		e.target.checked? setIsCheck(newUsers):setIsCheck([])
-	  };
-	
-	const toggleCheckbox = (e: React.ChangeEvent<HTMLInputElement>,item: any) => {
+		e.target.checked ? setIsCheck(newUsers) : setIsCheck([]);
+	};
+
+	const toggleCheckbox = (
+		e: React.ChangeEvent<HTMLInputElement>,
+		item: any
+	) => {
 		// const newUsers = users;
 		// newUsers.forEach(user => {
 		//   if (user.username === e.target.name){user.isChecked = e.target.checked}
-			
+
 		// });
 		// setUsers(newUsers)
 		let tempUser = isCheck.find((user) => user.username === e.target.name);
@@ -57,8 +60,7 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 			setIsCheck(newCheckedUsers);
 		}
 		console.log(isCheck);
-
-	  };
+	};
 
 	// const handleAllChecked = () => {
 	// 	setIsCheckAll((prev) => !prev);
@@ -104,21 +106,31 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 	}
 
 	async function logout() {
-		try {
-			await UsersApi.logout();
-		} catch (error) {
-			console.error(error);
-			alert(error);
-		}
-	}
+        try {
+            await UsersApi.logout();
+            onLogoutSuccessful();
+        } catch (error) {
+            console.error(error);
+            alert(error);
+        }
+    }
 
 	const deleteAll = () => {
-		isCheck.map((item) => deleteUser(item));
-		isCheck.find((item) =>
-			item.username === loggedInUser.username
-				? logout()
-				: setIsCheck([]))
-        loadUsers()
+		{
+			isCheck.map((item) =>
+				deleteUser(item)
+					.then(() => {
+						isCheck.find((item) =>
+							item.username === loggedInUser.username
+								? logout()
+								: setIsCheck([])
+						);
+					})
+					.then((res) => {
+						loadUsers();
+					})
+			);
+		}
 	};
 
 	async function blockStatus(user: UserNote) {
@@ -129,24 +141,24 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 			alert(error);
 		}
 	}
+
 	const blockStatusAll = () => {
-		isCheck.map((item) => blockStatus(item));
-		setIsClick((prev) => !prev);
-		loadUsers();
-		console.log(isCheck);
+		{
+			isCheck.map((item) =>
+				blockStatus(item)
+					.then((res) => {
+						isCheck.find((item) =>
+							item.username === loggedInUser.username
+								? logout()
+								: console.log("you're still active")
+						);
+					})
+					.then((res) => {
+						loadUsers();
+					})
+			);
+		}
 	};
-
-	const dropUser =()=>{
-		isCheck.find((item) =>
-			item.username === loggedInUser.username
-				? logout()
-				: console.log("you're still active")
-		);
-	}
-
-	useEffect(() => {
-		dropUser()
-	}, [isClick]);
 
 	async function activateStatus(user: UserNote) {
 		try {
@@ -156,13 +168,18 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 			alert(error);
 		}
 	}
+
 	const activateStatusAll = () => {
-		isCheck.map((item) => activateStatus(item));
-		loadUsers()
-		// setIsCheck([])
+		{
+			isCheck.map((item) =>
+				activateStatus(item).then((res) => {
+					loadUsers();
+				})
+			);
+		}
 	};
 
-    const usersGrid = (
+	const usersGrid = (
 		<>
 			{users.map((user) => (
 				<tr key={user._id}>
@@ -189,7 +206,9 @@ const UsersPageLoggedInView = ({ loggedInUser }: UsersPageProps) => {
 		<>
 			{users.length > 0 ? (
 				<>
-					<ButtonGroup aria-label="Basic example" className="mb-3 width100">
+					<ButtonGroup
+						aria-label="Basic example"
+						className="mb-3 width100">
 						<Button variant="danger" onClick={blockStatusAll}>
 							Block
 						</Button>

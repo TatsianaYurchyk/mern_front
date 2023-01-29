@@ -40,7 +40,7 @@ function App() {
 					<Routes>
 						<Route
 							path='/'
-							element={<UsersPage loggedInUser={loggedInUser} />}
+							element={<UsersPage loggedInUser={loggedInUser} onLogoutSuccessful={() => setLoggedInUser(null)} />}
 						/>
 
 					</Routes>

@@ -5,14 +5,15 @@ import { User } from "../models/user";
 
 interface UsersPageProps {
     loggedInUser: User | null,
+    onLogoutSuccessful: () => void,
 }
 
-const UsersPage = ({ loggedInUser }: UsersPageProps) => {
+const UsersPage = ({ loggedInUser,onLogoutSuccessful}: UsersPageProps) => {
     return (
         <Container >
             <>
                 {loggedInUser
-                    ? <UsersPageLoggedInView1 loggedInUser={loggedInUser}/>
+                    ? <UsersPageLoggedInView1 loggedInUser={loggedInUser} onLogoutSuccessful={onLogoutSuccessful}/>
                     : <UsersPageLoggedOutView />
                 }
             </>
